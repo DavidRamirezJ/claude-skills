@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Análisis de Activos y Carteras BBVA — Asset Advisor 2026</title>
+<style>
+  :root{
+    --bg:#0e1621;--bg2:#0b1119;--card:#16212f;--card2:#1b2838;--ink:#e9eef5;--mut:#9db0c6;
+    --line:#26374c;--good:#31c48d;--warn:#f7b955;--bad:#f16a6a;--accent:#4f9dff;--accent2:#8b5cf6;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:linear-gradient(180deg,#0b1119,#0e1621);color:var(--ink);padding:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 28px 60px}
+  header.hero{border:1px solid var(--line);border-radius:16px;padding:28px 30px;
+       background:radial-gradient(120% 140% at 0% 0%,rgba(79,157,255,.14),transparent 55%),var(--card)}
+  h1{font-size:28px;margin:0 0 6px;letter-spacing:-.3px}
+  h2{font-size:20px;margin:38px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);
+     display:flex;align-items:center;gap:10px}
+  h2 .n{font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:6px;
+        padding:1px 8px;font-weight:700}
+  h3{font-size:16px;margin:20px 0 8px}
+  p{margin:8px 0}
+  .sub{color:var(--mut);font-size:13.5px}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+  .meta-grid div{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .meta-grid b{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+     position:sticky;top:0;background:var(--card2)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr:hover td{background:rgba(79,157,255,.05)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0;overflow:auto}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .solid{background:rgba(49,196,141,.15);color:var(--good)}
+  .neutral{background:rgba(247,185,85,.15);color:var(--warn)}
+  .weak{background:rgba(241,106,106,.15);color:var(--bad)}
+  .score{font-weight:800;font-variant-numeric:tabular-nums}
+  .bar{height:9px;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));display:inline-block;vertical-align:middle}
+  .barbg{background:var(--bg2);border-radius:5px;height:9px;width:100%;min-width:70px;overflow:hidden;display:inline-block}
+  .role{font-size:12px;color:var(--mut)}
+  ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
+  .callout{border-left:4px solid var(--warn);background:rgba(247,185,85,.07);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+  .callout.good{border-color:var(--good);background:rgba(49,196,141,.07)}
+  .callout.bad{border-color:var(--bad);background:rgba(241,106,106,.07)}
+  .disclaimer{font-size:12px;color:var(--mut);border-left:3px solid var(--warn);
+              padding:12px 16px;background:rgba(247,185,85,.06);border-radius:0 10px 10px 0;margin-top:24px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.two{grid-template-columns:1fr}}
+  .tag{font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin-left:6px}
+  .flag{color:var(--warn);font-size:12px}
+  footer{margin-top:34px;color:var(--mut);font-size:12px;text-align:center;border-top:1px solid var(--line);padding-top:16px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .toc a{font-size:12.5px;color:var(--accent);text-decoration:none;border:1px solid var(--line);
+         border-radius:8px;padding:5px 11px;background:var(--bg2)}
+  .toc a:hover{border-color:var(--accent)}
+  .alloc-row td{padding:7px 11px}
+  .wt{font-weight:700;font-variant-numeric:tabular-nums}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:8px 0 4px}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--mut)}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .donut-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .donut-legend{font-size:13px;min-width:210px}
+  .donut-legend .row{display:flex;align-items:center;gap:8px;margin:4px 0}
+  .donut-legend .sw{width:12px;height:12px;border-radius:3px;flex:0 0 auto}
+  .donut-legend .nm{flex:1}
+  .donut-legend .pc{font-weight:700;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>Análisis de Activos y Carteras BBVA</h1>
+    <p class="sub">Evaluación disciplinada de 8 fondos + 4 productos estructurados + 8 carteras del simulador, con
+    <b>datos macro reales verificados en internet</b>, alternativas fuera de BBVA y ETFs · generado por la skill <code>asset-advisor</code></p>
+    <div class="meta-grid">
+      <div><b>Fecha análisis</b>9 jul 2026</div>
+      <div><b>Datos (as-of)</b>Fichas jun 2026 · macro 9 jul 2026</div>
+      <div><b>Moneda</b>MXN</div>
+      <div><b>CETES 28d real</b>6.29% (Banxico)</div>
+      <div><b>Banxico</b>6.50% · bajando</div>
+      <div><b>Universo</b>8 fondos + 4 estructurados</div>
+    </div>
+    <div class="toc">
+      <a href="#resumen">Resumen ejecutivo</a>
+      <a href="#conceptos">Conceptos clave</a>
+      <a href="#macro">Datos macro reales</a>
+      <a href="#fondos">Evaluación de fondos</a>
+      <a href="#detalle">Detalle por fondo</a>
+      <a href="#estructurados">Productos estructurados</a>
+      <a href="#conservadora">Cartera conservadora</a>
+      <a href="#moderada">Cartera moderada</a>
+      <a href="#ejercicio">Ejercicio $1.5M</a>
+      <a href="#alternativas">Alternativas y ETFs</a>
+      <a href="#simulador">Carteras del simulador</a>
+      <a href="#riesgos">Riesgos y vacíos</a>
+      <a href="#metodo">Metodología</a>
+    </div>
+  </header>
+
+  <!-- ============ RESUMEN ============ -->
+  <h2 id="resumen"><span class="n">01</span> Resumen ejecutivo</h2>
+  <div class="callout good">
+    <b>Recomendación en una línea.</b> Con <b>$1.5M MXN</b> hay tres caminos (§09): <b>A Conservadora</b> ~8.5% con peor año −2%;
+    <b>B Riesgo medio</b> ~11% con peor año −8%; <b>C Crecimiento con warrants protegidos</b> ~9.5% con peor año de solo −1.5%.
+    <b>C es la más eficiente</b> (casi el techo de B con el piso de A) si aceptas atar 30% por 1.5 años; si necesitas liquidez total, <b>A</b>.
+  </div>
+  <div class="callout">
+    <b>Dato macro real (verificado en internet, 9 jul 2026).</b> CETES 28d = <b>6.29%</b> (no el 8% asumido al inicio) y Banxico
+    en <b>ciclo de recorte</b> (6.50%). Con el listón más bajo, los fondos de deuda BBVAC (~10%) y BBVAM (~11%) le ganan a CETES
+    por buen margen. Los 4 "warrants" resultaron ser <b>notas de capital 100% protegido</b>, no derivados especulativos (§06).
+  </div>
+  <div class="callout bad">
+    <b>Advertencia crítica sobre el simulador.</b> Los dos reportes <code>Simulador_Portafolios</code> simulan <b>un solo mes
+    (1–29 may 2026)</b>. Sus cifras de "rendimiento anualizado 16–35%" son ese mes tranquilo multiplicado ×12 — <b>no</b> son
+    expectativas a futuro, y su volatilidad/caída son de un mes (por eso "% meses positivos = 0%"). Por eso los <b>fondos</b> se
+    puntúan con sus fichas de 3.5 años (dato honesto) y el simulador solo se usa para comparar <b>formas de asignación</b>.
+  </div>
+
+  <!-- ============ CONCEPTOS CLAVE ============ -->
+  <h2 id="conceptos"><span class="n">02</span> Conceptos clave — cómo leer este análisis</h2>
+  <p class="sub">La idea central: <b>no premiamos al que más ganó, sino al que ganó más por cada susto que te hizo pasar</b>
+  (rendimiento ajustado al riesgo). Estas cuatro medidas gobiernan todo el análisis.</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Término técnico</th><th>Qué mide en cristiano</th><th>Regla de lectura</th></tr></thead>
+      <tbody>
+        <tr><td><b>Rendimiento anualizado (CAGR)</b></td>
+            <td>Cuánto ganó el fondo por año, en promedio compuesto.</td>
+            <td>Más alto = mejor, pero <b>solo no basta</b>.</td></tr>
+        <tr><td><b>Volatilidad (σ)</b></td>
+            <td>Qué tanto "brinca" el valor arriba y abajo — el nerviosismo del fondo.</td>
+            <td>Más baja = más tranquilo. ~2% es plácido; ~20% es montaña rusa.</td></tr>
+        <tr><td><b>Máxima caída (drawdown)</b></td>
+            <td>El peor golpe desde un pico hasta el fondo — el dolor máximo que viviste.</td>
+            <td>Menos negativo = mejor. Es cuánto podrías ver perder temporalmente.</td></tr>
+        <tr><td><b>Sharpe ratio</b></td>
+            <td>Cuánto rendimiento <b>extra</b> te dieron por cada unidad de riesgo corrido — la "eficiencia".</td>
+            <td>&gt;1 bueno, &gt;2 excelente.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <h3>Por qué el listón mexicano está tan alto (Sharpe y CETES)</h3>
+      <p>El Sharpe se calcula: <code>(Rend. fondo − Tasa libre de riesgo) / Volatilidad</code>. La <b>tasa libre de riesgo</b>
+      es lo que ganarías sin arriesgar nada — en México, los <b>CETES</b>, que asumí en <b>~8% (assumed)</b>.</p>
+      <p>Como CETES rinde ~8%, un fondo tiene que rendir <b>bastante por encima de 8%</b> para justificar el riesgo. Por eso:</p>
+      <ul>
+        <li><b>BBVAC</b> rinde ~10% → exceso sobre CETES solo ~2% → Sharpe ≈ 0.7 (bueno, pero el listón está alto).</li>
+        <li><b>BBVAC+</b> rinde ~6% → <b>por debajo de CETES</b> → Sharpe negativo. Traducción: te convendría más tener
+        CETES directo; por eso es "lastre" (estabilizador), no motor de rendimiento.</li>
+      </ul>
+      <p class="flag">Como el Sharpe depende del 8% asumido, si la tasa real fuera 7% o 9% los números se mueven — de ahí la etiqueta <code>(assumed)</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Sharpe vs Sortino: no toda la volatilidad es mala</h3>
+      <ul>
+        <li><b>Sharpe</b> castiga <b>toda</b> la volatilidad, incluso cuando el fondo sube mucho.</li>
+        <li><b>Sortino</b> castiga <b>solo</b> la volatilidad hacia abajo (las pérdidas). Es más justo — a nadie le molesta
+        que su fondo "brinque hacia arriba".</li>
+      </ul>
+      <p>Por eso destaqué el <b>Sortino ~1.4 de BBVAM</b>: significa que su volatilidad es mayormente "buena" (subidas),
+      no pérdidas. Es la razón de que sea el núcleo del perfil moderado.</p>
+      <h3 style="margin-top:16px">Diversificación por correlación</h3>
+      <p>Regla de oro: la volatilidad de una cartera <b>NO es el promedio</b> de las volatilidades individuales, porque los
+      activos no se mueven todos a la vez. Money-market (LIQ), bolsa mexicana (RV) y bolsa de EE.UU. (US) responden a cosas
+      distintas — tasas MXN, economía local y tech + tipo de cambio. Al mezclarlas, el nerviosismo total <b>baja más de lo esperado</b>.</p>
+    </div>
+  </div>
+
+  <div class="callout bad">
+    <b>La trampa del simulador, explicada.</b> Los reportes muestran "rendimiento anualizado 35%", pero corrieron sobre
+    <b>un solo mes (1–29 may 2026)</b>. La anualización toma ese mes y lo multiplica (factor 252 días) <b>como si todo el año
+    fuera igual de bueno</b>. Es como medir tu velocidad en una bajada de 100 m y decir "voy a 120 km/h todo el viaje". Tres
+    pruebas de que no es fiable: (1) <b>"% meses positivos = 0%"</b> en las 8 carteras porque no completó ni un mes entero;
+    (2) la volatilidad/caída son de <b>un mes tranquilo</b>, sin crisis; (3) no trae Sharpe, benchmark ni perfil. Por eso el
+    ranking se apoya en las fichas de <b>3.5 años</b> (que sí incluyen años malos, como el −7.9% de BBVARV en 2024) y el
+    simulador solo se usa para comparar la <b>forma</b> de las carteras.
+  </div>
+
+  <p class="sub"><b>Glosario rápido:</b>
+  <b>Pólvora seca</b> = efectivo (BBVALIQ) listo para desplegar si el mercado cae y aparecen oportunidades baratas ·
+  <b>Carry / riesgo de reinversión</b> = un fondo que solo cobra la tasa (LIQ, C+): si las tasas bajan, su rendimiento baja con ellas ·
+  <b>FX sin cobertura</b> = exposición peso/dólar abierta: si el peso se fortalece, tus ganancias en dólares se encogen al convertirlas ·
+  <b>Solapamiento (overlap)</b> = dos fondos que tienen las mismas empresas (NVDA, AAPL…) no diversifican: es la misma apuesta repetida.</p>
+
+  <!-- ============ MACRO REAL ============ -->
+  <h2 id="macro"><span class="n">03</span> Datos macro reales (verificados en internet · 9 jul 2026)</h2>
+  <div class="callout bad">
+    <b>Corrección importante vs. versión anterior.</b> El análisis inicial asumía CETES ~8%. El dato <b>real</b>, verificado en
+    Banxico y TradingEconomics, es <b>CETES 28d = 6.29%</b>. Con el listón más bajo, los fondos de deuda le ganan a la tasa por
+    <b>mayor</b> margen del que se creía, y estamos en un <b>ciclo de recorte</b> de tasas — no de tasas altas estables.
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Indicador</th><th class="num">Valor real</th><th>Fuente · fecha</th><th>Implicación</th></tr></thead>
+      <tbody>
+        <tr><td><b>CETES 28 días</b> (tasa libre de riesgo)</td><td class="num">6.29%</td><td>Banxico SIE · 9 jul 2026</td><td>El nuevo listón para "¿supera CETES?"</td></tr>
+        <tr><td>CETES 91 / 182 / 364 días</td><td class="num">6.49 / 6.76 / 7.10%</td><td>Banxico SIE · 9 jul 2026</td><td>Curva al alza por plazo</td></tr>
+        <tr><td><b>Tasa objetivo Banxico</b></td><td class="num">6.50%</td><td>Banxico · recorte may, mantenida 25 jun 2026</td><td><b>Ciclo de bajada</b> → favorece duración, presiona money-market</td></tr>
+        <tr><td>Inflación general / subyacente</td><td class="num">3.37 / 4.03%</td><td>TradingEconomics · jun 2026</td><td>General cerca de meta 3%; real positivo</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:10px"><b>Efecto en los Sharpe:</b> recalculados con Rf = 6.29% (antes 8% asumido), el rendimiento
+    ajustado al riesgo de todos los fondos <b>mejora</b>. BBVAC+ (~6.1%) pasa de "por debajo de CETES" a <b>casi a la par</b>.</p>
+  </div>
+
+  <h3>Supuestos que siguen siendo supuestos</h3>
+  <div class="card">
+    <ul>
+      <li><b>Volatilidad, caída máxima y Sharpe (computed):</b> <b>ninguna ficha los publica</b>; se calcularon de las series mensuales. El rendimiento sí es de la ficha.</li>
+      <li><b>Comisiones/TER y benchmark:</b> <b>ninguna ficha los revela</b> → se penalizó "Costo" en todos los fondos; los rendimientos se declaran netos de comisiones e impuestos.</li>
+      <li><b>Correlaciones:</b> no hay matriz disponible → la diversificación se estima cualitativamente.</li>
+      <li><b>Validación de fichas:</b> los 8 fondos se confirmaron reales (bbva.mx, BMV). BBVADIG público = <b>32.6%</b> (dic 2025) vs. ~28.8% de la ficha jun 2026 — mismo orden, distinta fecha de corte. Agregadores (Morningstar/Yahoo) bloquearon acceso automatizado para 6 fondos.</li>
+    </ul>
+  </div>
+
+  <!-- ============ EVALUACIÓN FONDOS ============ -->
+  <h2 id="fondos"><span class="n">04</span> Evaluación de los 8 fondos (rúbrica 0–100)</h2>
+  <p class="sub">Puntaje ponderado: Rend. ajustado al riesgo 30% · Protección a la baja 20% · Consistencia 15% · Costo 10% · Diversificación 15% · Macro 10%.</p>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Fondo</th><th>Clase / rol</th>
+        <th class="num">Rend. anual.*</th><th class="num">Volat.*</th><th class="num">Máx. caída*</th>
+        <th class="num">Puntaje</th><th>Banda</th><th>Conf.</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>1</td><td><b>BBVALIQ</b></td><td>Money-market MXN · AAA/1 · riesgo 1/7 <span class="role">— ancla liquidez</span></td>
+            <td class="num">~5.5–7.8%</td><td class="num">~0%</td><td class="num">~0</td>
+            <td class="num score">77</td><td><span class="pill solid">Solid</span></td><td>Media</td></tr>
+        <tr><td>2</td><td><b>BBVAC</b></td><td>Multiestrategia conservador · 80% deuda <span class="role">— núcleo defensivo</span></td>
+            <td class="num">~10%</td><td class="num">~2.5%</td><td class="num">−1.7% (mes)</td>
+            <td class="num score">74</td><td><span class="pill solid">Solid</span></td><td>Media</td></tr>
+        <tr><td>3</td><td><b>BBVAM</b></td><td>Multiestrategia moderado · 65% deuda / 33% RV <span class="role">— núcleo balanceado</span></td>
+            <td class="num">~11%</td><td class="num">~4.3%</td><td class="num">−3.4% (mes)</td>
+            <td class="num score">72</td><td><span class="pill solid">Solid</span></td><td>Media</td></tr>
+        <tr><td>4</td><td><b>BBVAC+</b></td><td>UST 0–1a cubierto MXN · cash-plus <span class="role">— lastre deuda</span></td>
+            <td class="num">~6.1%</td><td class="num">~0.5%</td><td class="num">~0</td>
+            <td class="num score">70</td><td><span class="pill solid">Solid</span></td><td>Media</td></tr>
+        <tr><td>5</td><td><b>BBVANDQ</b></td><td>Acciones NASDAQ · tech <span class="role">— satélite crecimiento</span></td>
+            <td class="num">~22%</td><td class="num">~15.9%</td><td class="num">−15.6%</td>
+            <td class="num score">57</td><td><span class="pill neutral">Neutral</span></td><td>Media</td></tr>
+        <tr><td>6</td><td><b>BBVAUS</b></td><td>Acciones EE.UU. · S&amp;P/mega-cap <span class="role">— sleeve RV EE.UU.</span></td>
+            <td class="num">~13.9%</td><td class="num">~13.0%</td><td class="num">−13.6%</td>
+            <td class="num score">56</td><td><span class="pill neutral">Neutral</span></td><td>Media-baja</td></tr>
+        <tr><td>7</td><td><b>BBVARV</b></td><td>Acciones México <span class="role">— sleeve RV local</span></td>
+            <td class="num">~12.8%</td><td class="num">~13.9%</td><td class="num">−13.9%</td>
+            <td class="num score">55</td><td><span class="pill neutral">Neutral</span></td><td>Media</td></tr>
+        <tr><td>8</td><td><b>BBVADIG</b></td><td>Tech/cripto global · agresivo <span class="role">— satélite alto riesgo</span></td>
+            <td class="num">~28.8%</td><td class="num">~22%</td><td class="num">~−24%</td>
+            <td class="num score">51</td><td><span class="pill neutral">Neutral</span></td><td>Media-baja</td></tr>
+      </tbody>
+    </table>
+    <p class="flag">* Volatilidad, caída máxima y Sharpe <b>no venían en las fichas</b> — calculados de las series mensuales. El rendimiento sí es de la ficha. Sharpe usa <b>CETES real 6.29%</b> (Banxico, 9 jul 2026) — no el 8% asumido antes.</p>
+  </div>
+
+  <h3>Subpuntajes por dimensión</h3>
+  <div class="card">
+    <table>
+      <thead><tr><th>Fondo</th>
+        <th class="num">Rend/riesgo (30%)</th><th class="num">Baja (20%)</th><th class="num">Consist. (15%)</th>
+        <th class="num">Costo (10%)</th><th class="num">Diversif. (15%)</th><th class="num">Macro (10%)</th><th class="num">Total</th></tr></thead>
+      <tbody>
+        <tr><td><b>BBVALIQ</b></td><td class="num">70</td><td class="num">88</td><td class="num">82</td><td class="num">80</td><td class="num">78</td><td class="num">68</td><td class="num score">77</td></tr>
+        <tr><td><b>BBVAC</b></td><td class="num">72</td><td class="num">85</td><td class="num">85</td><td class="num">55</td><td class="num">70</td><td class="num">70</td><td class="num score">74</td></tr>
+        <tr><td><b>BBVAM</b></td><td class="num">70</td><td class="num">78</td><td class="num">80</td><td class="num">60</td><td class="num">72</td><td class="num">65</td><td class="num score">72</td></tr>
+        <tr><td><b>BBVAC+</b></td><td class="num">55</td><td class="num">90</td><td class="num">90</td><td class="num">60</td><td class="num">72</td><td class="num">55</td><td class="num score">70</td></tr>
+        <tr><td><b>BBVANDQ</b></td><td class="num">62</td><td class="num">45</td><td class="num">58</td><td class="num">55</td><td class="num">68</td><td class="num">50</td><td class="num score">57</td></tr>
+        <tr><td><b>BBVAUS</b></td><td class="num">58</td><td class="num">50</td><td class="num">55</td><td class="num">62</td><td class="num">60</td><td class="num">50</td><td class="num score">56</td></tr>
+        <tr><td><b>BBVARV</b></td><td class="num">50</td><td class="num">48</td><td class="num">62</td><td class="num">60</td><td class="num">68</td><td class="num">50</td><td class="num score">55</td></tr>
+        <tr><td><b>BBVADIG</b></td><td class="num">58</td><td class="num">35</td><td class="num">50</td><td class="num">58</td><td class="num">55</td><td class="num">48</td><td class="num score">51</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <b>Hallazgo clave.</b> Los cuatro instrumentos defensivos (LIQ, C, M, C+) puntúan <b>Solid</b> con volatilidad ≤4.3%.
+    Las cuatro bolsas puntúan <b>Neutral</b>: buen retorno pero Sharpe ~0.3–0.9 y caídas de 13–24%. <b>BBVAC+ rinde ~6%,
+    probablemente por debajo de CETES</b>, así que funciona como lastre, no como motor de rendimiento.
+  </div>
+
+  <h3>Vista visual — los dos grupos de un vistazo</h3>
+  <div class="legend">
+    <span class="lg"><span class="dot" style="background:#3987e5"></span>Defensivos (deuda / money-market)</span>
+    <span class="lg"><span class="dot" style="background:#d95926"></span>Bolsa (renta variable)</span>
+  </div>
+
+  <div class="card">
+    <p class="sub" style="margin-top:0"><b>Riesgo vs Rendimiento.</b> Cada punto es un fondo. Eje horizontal = volatilidad
+    (nerviosismo); eje vertical = rendimiento anualizado. <b>Arriba-a-la-izquierda es lo deseable</b> (gana mucho, se mueve poco).
+    Se ve nítido: los defensivos (azul) se apretujan abajo-izquierda; las bolsas (naranja) suben en diagonal — más rendimiento,
+    pero pagando con mucha más volatilidad.</p>
+    <svg viewBox="0 0 720 400" role="img" aria-label="Dispersión de riesgo contra rendimiento de los 8 fondos" style="width:100%;height:auto">
+      <!-- gridlines verticales (volatilidad 0,6,12,18,24) -->
+      <g stroke="#2c3a4d" stroke-width="1">
+        <line x1="56" y1="20" x2="56" y2="352"/><line x1="217" y1="20" x2="217" y2="352"/>
+        <line x1="378" y1="20" x2="378" y2="352"/><line x1="539" y1="20" x2="539" y2="352"/>
+        <line x1="700" y1="20" x2="700" y2="352"/>
+      </g>
+      <!-- gridlines horizontales (rendimiento 0,8,16,24,32) -->
+      <g stroke="#2c3a4d" stroke-width="1">
+        <line x1="56" y1="352" x2="700" y2="352"/><line x1="56" y1="284" x2="700" y2="284"/>
+        <line x1="56" y1="196" x2="700" y2="196"/><line x1="56" y1="108" x2="700" y2="108"/>
+        <line x1="56" y1="20" x2="700" y2="20"/>
+      </g>
+      <!-- etiquetas eje X -->
+      <g fill="#898781" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">
+        <text x="56" y="370">0%</text><text x="217" y="370">6%</text><text x="378" y="370">12%</text>
+        <text x="539" y="370">18%</text><text x="700" y="370">24%</text>
+        <text x="378" y="392" fill="#9db0c6" font-size="12">Volatilidad (riesgo) →</text>
+      </g>
+      <!-- etiquetas eje Y -->
+      <g fill="#898781" font-size="11" text-anchor="end" font-family="system-ui,sans-serif">
+        <text x="50" y="356">0%</text><text x="50" y="288">8%</text><text x="50" y="200">16%</text>
+        <text x="50" y="112">24%</text><text x="50" y="24">32%</text>
+      </g>
+      <text x="16" y="196" fill="#9db0c6" font-size="12" text-anchor="middle" font-family="system-ui,sans-serif" transform="rotate(-90 16 196)">Rendimiento anualizado ↑</text>
+      <!-- puntos defensivos (azul) -->
+      <g stroke="#16212f" stroke-width="2">
+        <circle cx="64" cy="301" r="7" fill="#3987e5"/>
+        <circle cx="69" cy="305" r="7" fill="#3987e5"/>
+        <circle cx="123" cy="262" r="7" fill="#3987e5"/>
+        <circle cx="171" cy="251" r="7" fill="#3987e5"/>
+      </g>
+      <!-- puntos bolsa (naranja) -->
+      <g stroke="#16212f" stroke-width="2">
+        <circle cx="405" cy="219" r="7" fill="#d95926"/>
+        <circle cx="429" cy="231" r="7" fill="#d95926"/>
+        <circle cx="483" cy="130" r="7" fill="#d95926"/>
+        <circle cx="646" cy="55" r="7" fill="#d95926"/>
+      </g>
+      <!-- etiquetas de punto -->
+      <g fill="#e9eef5" font-size="11" font-family="system-ui,sans-serif" font-weight="600">
+        <text x="78" y="298">LIQ</text>
+        <text x="83" y="317">C+</text>
+        <text x="137" y="259">C</text>
+        <text x="185" y="248">M</text>
+        <text x="405" y="211" text-anchor="middle">US</text>
+        <text x="429" y="249" text-anchor="middle">RV</text>
+        <text x="497" y="127">NDQ</text>
+        <text x="646" y="47" text-anchor="middle">DIG</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="card">
+    <p class="sub" style="margin-top:0"><b>Puntaje de la rúbrica (0–100).</b> Barras ordenadas de mayor a menor. Las líneas
+    punteadas marcan las bandas: <b>60 = Solid</b> y <b>40 = Neutral</b>. Todos los defensivos (azul) superan 60; todas las
+    bolsas (naranja) caen en la zona 51–57.</p>
+    <svg viewBox="0 0 720 344" role="img" aria-label="Puntaje de rúbrica de los 8 fondos" style="width:100%;height:auto">
+      <!-- líneas de banda 40 / 60 / 80 -->
+      <g stroke="#52514e" stroke-width="1" stroke-dasharray="4 4">
+        <line x1="330" y1="16" x2="330" y2="322"/><line x1="446" y1="16" x2="446" y2="322"/><line x1="563" y1="16" x2="563" y2="322"/>
+      </g>
+      <g fill="#898781" font-size="10" text-anchor="middle" font-family="system-ui,sans-serif">
+        <text x="330" y="338">40 · Neutral</text><text x="446" y="338">60 · Solid</text><text x="563" y="338">80 · Strong</text>
+      </g>
+      <!-- barras: azul defensivos (LIQ,C,M,C+), naranja bolsa (NDQ,US,RV,DIG) -->
+      <g font-family="system-ui,sans-serif">
+        <!-- LIQ 77 -->
+        <text x="88" y="40" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVALIQ</text>
+        <rect x="96" y="24" width="450" height="22" rx="4" fill="#3987e5"/>
+        <text x="554" y="40" fill="#e9eef5" font-size="12" font-weight="700">77</text>
+        <!-- C 74 -->
+        <text x="88" y="80" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVAC</text>
+        <rect x="96" y="64" width="432" height="22" rx="4" fill="#3987e5"/>
+        <text x="536" y="80" fill="#e9eef5" font-size="12" font-weight="700">74</text>
+        <!-- M 72 -->
+        <text x="88" y="120" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVAM</text>
+        <rect x="96" y="104" width="421" height="22" rx="4" fill="#3987e5"/>
+        <text x="525" y="120" fill="#e9eef5" font-size="12" font-weight="700">72</text>
+        <!-- C+ 70 -->
+        <text x="88" y="160" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVAC+</text>
+        <rect x="96" y="144" width="409" height="22" rx="4" fill="#3987e5"/>
+        <text x="513" y="160" fill="#e9eef5" font-size="12" font-weight="700">70</text>
+        <!-- NDQ 57 -->
+        <text x="88" y="200" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVANDQ</text>
+        <rect x="96" y="184" width="333" height="22" rx="4" fill="#d95926"/>
+        <text x="437" y="200" fill="#e9eef5" font-size="12" font-weight="700">57</text>
+        <!-- US 56 -->
+        <text x="88" y="240" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVAUS</text>
+        <rect x="96" y="224" width="327" height="22" rx="4" fill="#d95926"/>
+        <text x="431" y="240" fill="#e9eef5" font-size="12" font-weight="700">56</text>
+        <!-- RV 55 -->
+        <text x="88" y="280" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVARV</text>
+        <rect x="96" y="264" width="321" height="22" rx="4" fill="#d95926"/>
+        <text x="425" y="280" fill="#e9eef5" font-size="12" font-weight="700">55</text>
+        <!-- DIG 51 -->
+        <text x="88" y="320" fill="#e9eef5" font-size="12" text-anchor="end" font-weight="600">BBVADIG</text>
+        <rect x="96" y="304" width="298" height="22" rx="4" fill="#d95926"/>
+        <text x="402" y="320" fill="#e9eef5" font-size="12" font-weight="700">51</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ============ DETALLE POR FONDO ============ -->
+  <h2 id="detalle"><span class="n">05</span> Detalle por fondo — fortaleza y debilidad</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Fondo</th><th>Fortaleza destacada</th><th>Debilidad destacada</th><th>Datos clave (de ficha)</th></tr></thead>
+      <tbody>
+        <tr><td><b>BBVALIQ</b></td>
+          <td>Liquidez y preservación de capital de primer nivel — entrada/salida mismo día, AAA/1, banda 1/7; ~5.5–7.8% neto.</td>
+          <td>Pura tasa de carry con riesgo de reinversión: el rendimiento ya baja al ceder las tasas; sin crecimiento.</td>
+          <td>Gob 52.1% / Bancario 27.2% / Efectivo 10.2% / Repo 7.5%. AUM $406,485 mdp. As-of may 2026 (más viejo).</td></tr>
+        <tr><td><b>BBVAC</b></td>
+          <td>~10% MXN a solo ~2.5% de volatilidad con 85% de meses positivos — núcleo defensivo casi ideal.</td>
+          <td>Sin TER/benchmark/caída máxima oficial; estructura fondo-de-fondos que puede acumular comisiones.</td>
+          <td>Deuda 80% / RV 17% / Ret.abs. 3%. Duración 1.3a. 35/6 meses +. AUM $78,470 mdp.</td></tr>
+        <tr><td><b>BBVAM</b></td>
+          <td>Suavidad excepcional para su retorno — ~4.3% vol, 78% meses +, tres años calendario positivos (mejor Sortino ~1.4).</td>
+          <td>Ventaja ajustada al riesgo fina en MXN (Sharpe ~0.7, exceso sobre CETES solo ~2–3%); costos en capas.</td>
+          <td>Deuda 65% / RV 33% / Ret.abs. 3%. Duración 1.8a. 32/9 meses +. AUM $9,178 mdp.</td></tr>
+        <tr><td><b>BBVAC+</b></td>
+          <td>Preservación impecable — 41/41 meses positivos, caída ~0, duración 0.4a, cubierto de FX.</td>
+          <td>Rendimiento modesto y decreciente (~6.1% 12m) que probablemente queda por debajo de CETES; poco "reach for yield".</td>
+          <td>99.2% UST 0–1a cubierto MXN. Duración 0.4a. AUM $174,018 mdp. Etiquetado "RV" pese a ser deuda.</td></tr>
+        <tr><td><b>BBVANDQ</b></td>
+          <td>Motor de crecimiento de primer nivel — +52.9% (2024), +39% a 24m; buen ratio de aciertos.</td>
+          <td>Máximo riesgo sin protección — ~16% vol, ~−15.6% caída, FX sin cobertura, tech concentrado (57%, top-10 63%).</td>
+          <td>Tech 57.4% / Cons. no básico 24.6%. Top-10 = 62.7%. 29/12 meses +. AUM $4,657 mdp.</td></tr>
+        <tr><td><b>BBVAUS</b></td>
+          <td>Exposición mega-cap EE.UU. de primer nivel — +49.1% en 2024 y ~13.9% CAGR multianual.</td>
+          <td>Muy concentrado (47.7% tech, top-10 46.6%) y sin cobertura MXN/USD; −3.7% en 2025, −9% en Q1-2026.</td>
+          <td>Tech 47.7% / Financiero 13.5%. NVDA/GOOGL/AAPL/AMZN top. 26/15 meses +. AUM $10,319 mdp.</td></tr>
+        <tr><td><b>BBVARV</b></td>
+          <td>Sleeve de RV mexicana puro, líquido, con fuertes años al alza (23%+ en 2023 y 2025).</td>
+          <td>Libro cíclico concentrado (top-10 68.9%, Materiales 34% + Industrial 27%); año −7.9% (2024); Sharpe ~0.3.</td>
+          <td>Materiales 34.1% / Industrial 27.3% / Financiero 22.7%. GFNORTE/GMEXICO top. 25/16 meses +.</td></tr>
+        <tr><td><b>BBVADIG</b></td>
+          <td>Motor de crecimiento potente y no correlacionado (tech/cripto) — +58.3% en 2024, excelente liquidez.</td>
+          <td>Riesgo muy alto — ~22% vol, ~−24% caída, FX sin cobertura, 66% tech + mineras cripto; retornos irregulares.</td>
+          <td>Tech 66.2% / Financiero 19.2%. MARA/COIN/MU/NVDA top. 26/15 meses +. AUM $2,500 mdp. Perfil agresivo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ PRODUCTOS ESTRUCTURADOS ============ -->
+  <h2 id="estructurados"><span class="n">06</span> Productos estructurados nuevos (4 archivos añadidos)</h2>
+  <div class="callout">
+    <b>Sorpresa clave.</b> Pese a llamarse "Warrants", los tres <b>NO son warrants especulativos apalancados</b> — son
+    <b>notas estructuradas de BBVA con 100% de capital protegido</b> (el "warrant" es solo el envoltorio legal). Su riesgo no
+    es perder el principal por el mercado, sino tres cosas distintas: <b>riesgo de crédito de BBVA</b> (la protección vale lo
+    que valga el banco; sin cobertura IPAB), <b>iliquidez</b> (dinero atado 1.5 años / 364 días) y <b>techo de ganancia</b>.
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Producto</th><th>Estructura real</th><th>Subyacente</th><th class="num">Techo ganancia</th><th class="num">Piso</th><th>Plazo</th></tr></thead>
+      <tbody>
+        <tr><td><b>"Warrant" S&P</b></td><td>Twin Win Rebate · capital protegido</td><td>SPY (S&amp;P 500)</td><td class="num">+15% (~9.8% anual)</td><td class="num">0% + rebate 6%</td><td>1.5 años</td></tr>
+        <tr><td><b>"Warrant" SOXX</b></td><td>Call Spread 100/116% · cap. protegido</td><td>SOXX (semiconductores)</td><td class="num">16% en 18m (~10.5% anual)</td><td class="num">0%, devuelve capital</td><td>1.5 años</td></tr>
+        <tr><td><b>"Warrant" NASDAQ</b></td><td>Call Spread 100/112.5% · cap. protegido</td><td>QQQ (NASDAQ-100)</td><td class="num">12.5% en 18m (~8% anual)</td><td class="num">0%, devuelve capital</td><td>1.5 años</td></tr>
+        <tr><td><b>Nota TIIE "Rango"</b></td><td>Cupón digital todo-o-nada · cap. protegido</td><td>TIIE de Fondeo</td><td class="num">7.5% anual (tope)</td><td class="num">0% por cupón</td><td>364 días</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:10px">Todos en MXN, tipo Quanto (sin riesgo cambiario), pago solo al vencimiento (europeo). Strike, niveles y rebate son "indicativos" — se fijan al pactar. Costos/comisiones y mínimos <b>no se revelan</b> en los documentos.</p>
+  </div>
+  <div class="callout bad">
+    <b>Cuidado con la Nota TIIE — es la más engañosa.</b> Se etiqueta "Conservador" y promete hasta 7.5%, pero es un cupón
+    <b>binario</b> (0% o 7.5%) que solo paga si la TIIE cae dentro de rangos <b>estrechos y decrecientes</b> (el cupón 1 tiene
+    solo 30 pb de ancho). Como Banxico está <b>bajando</b> tasas, es probable que la TIIE se salga del rango en varios cupones
+    y pagues 0% ahí → podrías terminar <b>por debajo de CETES</b>. Un CETES a 364d te da <b>7.10% seguro</b> con garantía del
+    gobierno. Cambias ese 7.1% cierto por la <i>posibilidad</i> (no garantía) de 7.5% asumiendo riesgo de tasa y de contraparte.
+  </div>
+  <p class="sub"><b>¿Para quién sirven?</b> Como <b>satélite pequeño</b> de un perfil conservador-moderado que quiere exposición
+  bidireccional o al alza de bolsa <b>sin arriesgar el principal</b>, y que acepta el riesgo de crédito BBVA + la iliquidez. La de
+  <b>SOXX o NASDAQ</b> puede tener sentido táctico; la <b>Nota TIIE se recomienda evitar</b> por su probable 0% frente a un CETES directo.</p>
+
+  <h3>¿Qué es el "riesgo de crédito BBVA"?</h3>
+  <div class="two">
+    <div class="card">
+      <p><b>En un fondo (BBVAC, BBVAM…):</b> tu dinero está <b>invertido en activos que te pertenecen</b> y están segregados. Si
+      BBVA quebrara, esos activos siguen siendo tuyos. Tu riesgo es de <i>mercado</i> (que los activos bajen), no del banco.</p>
+    </div>
+    <div class="card">
+      <p><b>En un warrant / nota (los 4 de arriba):</b> le estás <b>prestando tu dinero a BBVA</b> a cambio de su promesa de
+      devolverte el 100% + rendimiento al vencimiento. Esa promesa <b>vale lo que valga la solvencia de BBVA</b> — <b>sin
+      cobertura IPAB</b>. Por eso un warrant "100% protegido" NO es tan seguro como un CETES (respaldo del gobierno) ni tan
+      "tuyo" como un fondo.</p>
+    </div>
+  </div>
+
+  <h3>Comparación unificada — warrants vs. todo lo demás</h3>
+  <p class="sub">Los warrants no tienen historial de precios, así que no entran en la rúbrica 0–100 (necesita series). Pero sí se
+  comparan en lo que importa: <b>techo de ganancia, peor escenario, riesgo de capital y liquidez</b>. Listón: CETES 6.29% (28d) / 7.10% (364d).</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Instrumento</th><th class="num">Ganancia potencial (anual)</th><th class="num">Peor escenario</th><th>¿Capital en riesgo?</th><th>Liquidez</th><th>Riesgo emisor</th></tr></thead>
+      <tbody>
+        <tr><td><b>CETES 364d</b></td><td class="num">7.10% fijo</td><td class="num">7.10% (seguro)</td><td>No</td><td>Al plazo</td><td>Gobierno (nulo)</td></tr>
+        <tr><td><b>BBVALIQ</b></td><td class="num">~5.5–7.8%</td><td class="num">~0%</td><td>No (vol ~0)</td><td>Diaria</td><td>Bajo</td></tr>
+        <tr><td><b>BBVAC</b> ⭐</td><td class="num">~10%</td><td class="num">−1.7% (mes)</td><td>Sí, mínimo</td><td>Diaria</td><td>Bajo</td></tr>
+        <tr><td><b>BBVAM</b></td><td class="num">~11%</td><td class="num">−3.4% (mes)</td><td>Sí, bajo</td><td>Diaria</td><td>Bajo</td></tr>
+        <tr><td><b>Warrant S&P</b></td><td class="num">tope ~9.8%</td><td class="num">0% a +6%</td><td><b>No</b> (protegido)</td><td>❌ Atado 1.5a</td><td><b>BBVA</b></td></tr>
+        <tr><td><b>Warrant SOXX</b></td><td class="num">tope ~10.5%</td><td class="num">0%</td><td><b>No</b> (protegido)</td><td>❌ Atado 1.5a</td><td><b>BBVA</b></td></tr>
+        <tr><td><b>Warrant NASDAQ</b></td><td class="num">tope ~8%</td><td class="num">0%</td><td><b>No</b> (protegido)</td><td>❌ Atado 1.5a</td><td><b>BBVA</b></td></tr>
+        <tr><td><b>Nota TIIE</b></td><td class="num">tope 7.5%</td><td class="num">0%</td><td><b>No</b> (protegido)</td><td>❌ Atado 364d</td><td><b>BBVA</b></td></tr>
+        <tr><td><b>BBVAUS / BBVARV</b></td><td class="num">~13–14%</td><td class="num">−13 a −14%</td><td>Sí, alto</td><td>Diaria</td><td>Bajo</td></tr>
+        <tr><td><b>BBVANDQ / BBVADIG</b></td><td class="num">~22–29%</td><td class="num">−16 a −24%</td><td>Sí, muy alto</td><td>Diaria</td><td>Bajo</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <b>El hallazgo que revela juntarlos.</b> El warrant S&P (tope ~9.8%, atado 1.5a, con riesgo de crédito BBVA) compite
+    directamente contra <b>BBVAC, que ya da ~10% con liquidez diaria, caída de solo −1.7% y sin candado</b>. La protección de
+    capital de los warrants vale mucho <b>frente a las bolsas</b> (que caen 13–24%), pero <b>poco frente a un buen fondo de deuda</b>.
+    Traducción: los warrants solo brillan si tu alternativa era bolsa pura y no aguantas la caída; si tu alternativa es BBVAC, <b>no los necesitas</b>.
+  </div>
+
+  <!-- ============ CARTERA CONSERVADORA ============ -->
+  <h2 id="conservadora"><span class="n">07</span> Cartera CONSERVADORA recomendada</h2>
+  <p class="sub">Objetivo: preservación de capital · volatilidad estimada ~3–4% · RV total ~15% (dentro del tope conservador de 25%).</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Fondo</th><th>Rol</th><th class="num">Peso</th><th style="width:38%">Asignación</th></tr></thead>
+      <tbody>
+        <tr class="alloc-row"><td><b>BBVAC</b></td><td class="role">Núcleo multiestrategia defensivo</td><td class="num wt">45%</td>
+          <td><span class="barbg"><span class="bar" style="width:45%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVALIQ</b></td><td class="role">Ancla de liquidez (riesgo 1/7)</td><td class="num wt">25%</td>
+          <td><span class="barbg"><span class="bar" style="width:25%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVAC+</b></td><td class="role">Lastre deuda ultra-corta</td><td class="num wt">15%</td>
+          <td><span class="barbg"><span class="bar" style="width:15%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVAUS</b></td><td class="role">Satélite RV EE.UU. (diversificación)</td><td class="num wt">8%</td>
+          <td><span class="barbg"><span class="bar" style="width:8%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVARV</b></td><td class="role">Satélite RV México (mercado poco correlacionado)</td><td class="num wt">7%</td>
+          <td><span class="barbg"><span class="bar" style="width:7%"></span></span></td></tr>
+      </tbody>
+    </table>
+    <div class="donut-wrap" style="margin:6px 0 14px">
+      <svg viewBox="0 0 180 180" width="170" height="170" role="img" aria-label="Composición cartera conservadora">
+        <g transform="rotate(-90 90 90)" fill="none" stroke-width="26">
+          <circle cx="90" cy="90" r="70" stroke="#2a78d6" stroke-dasharray="197.9 439.8" stroke-dashoffset="0"/>
+          <circle cx="90" cy="90" r="70" stroke="#184f95" stroke-dasharray="109.96 439.8" stroke-dashoffset="-197.9"/>
+          <circle cx="90" cy="90" r="70" stroke="#6da7ec" stroke-dasharray="65.97 439.8" stroke-dashoffset="-307.86"/>
+          <circle cx="90" cy="90" r="70" stroke="#d95926" stroke-dasharray="35.19 439.8" stroke-dashoffset="-373.83"/>
+          <circle cx="90" cy="90" r="70" stroke="#f0895e" stroke-dasharray="30.79 439.8" stroke-dashoffset="-409.02"/>
+        </g>
+        <text x="90" y="84" text-anchor="middle" fill="#9db0c6" font-size="11" font-family="system-ui,sans-serif">Defensivo</text>
+        <text x="90" y="102" text-anchor="middle" fill="#e9eef5" font-size="20" font-weight="800" font-family="system-ui,sans-serif">85%</text>
+      </svg>
+      <div class="donut-legend">
+        <div class="row"><span class="sw" style="background:#2a78d6"></span><span class="nm">BBVAC</span><span class="pc">45%</span></div>
+        <div class="row"><span class="sw" style="background:#184f95"></span><span class="nm">BBVALIQ</span><span class="pc">25%</span></div>
+        <div class="row"><span class="sw" style="background:#6da7ec"></span><span class="nm">BBVAC+</span><span class="pc">15%</span></div>
+        <div class="row"><span class="sw" style="background:#d95926"></span><span class="nm">BBVAUS <span class="role">(bolsa)</span></span><span class="pc">8%</span></div>
+        <div class="row"><span class="sw" style="background:#f0895e"></span><span class="nm">BBVARV <span class="role">(bolsa)</span></span><span class="pc">7%</span></div>
+      </div>
+    </div>
+    <p><b>Perfil estimado:</b> RV total ~15%, volatilidad <b>~3–4%</b>, caída máxima histórica esperada de un dígito bajo
+    <span class="tag">estimación de insumos históricos</span></p>
+    <p><b>Por qué, peso por peso:</b></p>
+    <ul>
+      <li><b>85% en los 3 de menor caída</b> (BBVAC + LIQ + C+): el mandato conservador es "preservar primero". Estos tres nunca
+      cayeron más de un dígito bajo, así que forman el colchón.</li>
+      <li><b>BBVAC 45% (no 50%):</b> es el mejor núcleo (rinde ~10% a solo 2.5% vol), pero dejo espacio a LIQ para no depender
+      de un solo fondo-de-fondos cuyas comisiones no conocemos.</li>
+      <li><b>El satélite de RV (15%) partido en dos:</b> México + EE.UU. responden a economías distintas, así que ese 15% da un
+      extra de rendimiento con menos riesgo que meterlo todo en un mercado. No incluyo NASDAQ ni DIG aquí: su caída de 16–24%
+      rompería el presupuesto conservador.</li>
+    </ul>
+    <p class="flag"><b>Riesgo que la invalida:</b> un repunte de tasas MXN dañaría la deuda de BBVAC/BBVAC+ a la vez; y BBVAUS
+    es sin cobertura, así que un peso mayor le restaría estabilidad.</p>
+  </div>
+
+  <!-- ============ CARTERA MODERADA ============ -->
+  <h2 id="moderada"><span class="n">08</span> Cartera MODERADA recomendada</h2>
+  <p class="sub">Objetivo: mejor rendimiento ajustado al riesgo · volatilidad estimada ~8–10% · RV total ~43%.</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Fondo</th><th>Rol</th><th class="num">Peso</th><th style="width:38%">Asignación</th></tr></thead>
+      <tbody>
+        <tr class="alloc-row"><td><b>BBVAM</b></td><td class="role">Núcleo balanceado moderado (mejor Sortino)</td><td class="num wt">40%</td>
+          <td><span class="barbg"><span class="bar" style="width:40%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVAC</b></td><td class="role">Lastre defensivo</td><td class="num wt">20%</td>
+          <td><span class="barbg"><span class="bar" style="width:20%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVAUS</b></td><td class="role">RV EE.UU.</td><td class="num wt">12%</td>
+          <td><span class="barbg"><span class="bar" style="width:12%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVARV</b></td><td class="role">RV México</td><td class="num wt">10%</td>
+          <td><span class="barbg"><span class="bar" style="width:10%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVALIQ</b></td><td class="role">Liquidez / pólvora seca</td><td class="num wt">10%</td>
+          <td><span class="barbg"><span class="bar" style="width:10%"></span></span></td></tr>
+        <tr class="alloc-row"><td><b>BBVANDQ</b></td><td class="role">RV NASDAQ (satélite crecimiento, acotado)</td><td class="num wt">8%</td>
+          <td><span class="barbg"><span class="bar" style="width:8%"></span></span></td></tr>
+      </tbody>
+    </table>
+    <div class="donut-wrap" style="margin:6px 0 14px">
+      <svg viewBox="0 0 180 180" width="170" height="170" role="img" aria-label="Composición cartera moderada">
+        <g transform="rotate(-90 90 90)" fill="none" stroke-width="26">
+          <circle cx="90" cy="90" r="70" stroke="#2a78d6" stroke-dasharray="175.93 439.8" stroke-dashoffset="0"/>
+          <circle cx="90" cy="90" r="70" stroke="#184f95" stroke-dasharray="87.96 439.8" stroke-dashoffset="-175.93"/>
+          <circle cx="90" cy="90" r="70" stroke="#6da7ec" stroke-dasharray="43.98 439.8" stroke-dashoffset="-263.89"/>
+          <circle cx="90" cy="90" r="70" stroke="#d95926" stroke-dasharray="52.78 439.8" stroke-dashoffset="-307.87"/>
+          <circle cx="90" cy="90" r="70" stroke="#f0895e" stroke-dasharray="43.98 439.8" stroke-dashoffset="-360.65"/>
+          <circle cx="90" cy="90" r="70" stroke="#eb6834" stroke-dasharray="35.19 439.8" stroke-dashoffset="-404.63"/>
+        </g>
+        <text x="90" y="84" text-anchor="middle" fill="#9db0c6" font-size="11" font-family="system-ui,sans-serif">Bolsa</text>
+        <text x="90" y="102" text-anchor="middle" fill="#e9eef5" font-size="20" font-weight="800" font-family="system-ui,sans-serif">30%</text>
+      </svg>
+      <div class="donut-legend">
+        <div class="row"><span class="sw" style="background:#2a78d6"></span><span class="nm">BBVAM</span><span class="pc">40%</span></div>
+        <div class="row"><span class="sw" style="background:#184f95"></span><span class="nm">BBVAC</span><span class="pc">20%</span></div>
+        <div class="row"><span class="sw" style="background:#6da7ec"></span><span class="nm">BBVALIQ</span><span class="pc">10%</span></div>
+        <div class="row"><span class="sw" style="background:#d95926"></span><span class="nm">BBVAUS <span class="role">(bolsa)</span></span><span class="pc">12%</span></div>
+        <div class="row"><span class="sw" style="background:#f0895e"></span><span class="nm">BBVARV <span class="role">(bolsa)</span></span><span class="pc">10%</span></div>
+        <div class="row"><span class="sw" style="background:#eb6834"></span><span class="nm">BBVANDQ <span class="role">(bolsa)</span></span><span class="pc">8%</span></div>
+      </div>
+    </div>
+    <p><b>Perfil estimado:</b> RV total ~43%, volatilidad <b>~8–10%</b>, caída máxima potencial de doble dígito bajo
+    <span class="tag">estimación de insumos históricos</span></p>
+    <p><b>Por qué, peso por peso:</b></p>
+    <ul>
+      <li><b>Núcleo BBVAM 40%:</b> tiene el mejor <b>Sortino (~1.4)</b> del grupo — su volatilidad es mayormente "buena"
+      (subidas), no pérdidas. Es el motor más eficiente para este perfil.</li>
+      <li><b>BBVAC 20% + LIQ 10% de lastre:</b> 30% defensivo que amortigua cuando la bolsa cae, y la parte de LIQ es
+      "pólvora seca" para reinvertir en caídas.</li>
+      <li><b>Ala de RV ~43% repartida en 3 mercados</b> (US 12 / RV 10 / NDQ 8): diversifica el riesgo bursátil en vez de
+      concentrarlo. <b>NASDAQ limitado a 8%</b> precisamente por su caída de −16%.</li>
+      <li><b>BBVADIG excluido a propósito:</b> vol ~22% y caída ~24% no caben en "moderado" — rompería el presupuesto de riesgo.</li>
+    </ul>
+    <p class="flag"><b>Riesgo que la invalida:</b> un mercado bajista en EE.UU. golpea BBVAUS+BBVANDQ (20% combinado, con
+    solapamiento en mega-caps tech) al mismo tiempo.</p>
+  </div>
+
+  <!-- ============ EJERCICIO 1.5M ============ -->
+  <h2 id="ejercicio"><span class="n">09</span> Ejercicio con $1,500,000 MXN — 3 opciones</h2>
+  <p class="sub">El objetivo: <b>el mejor rendimiento sin arriesgar de más</b>. Tres niveles de riesgo, incluyendo una opción que
+  usa los warrants como motor con piso protegido. Cifras = <b>estimaciones</b> de rendimiento esperado (rend. histórico neto de
+  fichas y topes de warrants) y peor año plausible (de las caídas históricas). <span class="flag">No son garantías.</span></p>
+
+  <div class="legend">
+    <span class="lg"><span class="dot" style="background:#1baf7a"></span>Conservadora</span>
+    <span class="lg"><span class="dot" style="background:#eda100"></span>Riesgo medio</span>
+    <span class="lg"><span class="dot" style="background:#e34948"></span>Crecimiento (con warrants)</span>
+  </div>
+
+  <div class="two">
+    <!-- OPCIÓN A -->
+    <div class="card" style="border-top:3px solid #1baf7a">
+      <h3 style="margin-top:0">🟢 Opción A — Conservadora</h3>
+      <p class="role" style="margin-top:0">Preservar primero. Le gana a CETES con vaivén casi nulo.</p>
+      <table>
+        <thead><tr><th>Fondo</th><th class="num">%</th><th class="num">Monto</th></tr></thead>
+        <tbody>
+          <tr><td>BBVAC</td><td class="num">45%</td><td class="num">$675,000</td></tr>
+          <tr><td>BBVALIQ</td><td class="num">25%</td><td class="num">$375,000</td></tr>
+          <tr><td>BBVAC+</td><td class="num">15%</td><td class="num">$225,000</td></tr>
+          <tr><td>BBVAUS</td><td class="num">8%</td><td class="num">$120,000</td></tr>
+          <tr><td>BBVARV</td><td class="num">7%</td><td class="num">$105,000</td></tr>
+        </tbody>
+      </table>
+      <p><b>Rend. esperado:</b> ~8.5% → <b>+$127,500</b> (a $1,627,500)<br>
+      <b>Peor año plausible:</b> ~−2% → −$30,000<br>
+      <b>Volatilidad:</b> ~3–4% · <b>Liquidez:</b> diaria total</p>
+    </div>
+
+    <!-- OPCIÓN B -->
+    <div class="card" style="border-top:3px solid #eda100">
+      <h3 style="margin-top:0">🟡 Opción B — Riesgo medio</h3>
+      <p class="role" style="margin-top:0">Mejor rendimiento ajustado al riesgo. Núcleo BBVAM + bolsa diversificada.</p>
+      <table>
+        <thead><tr><th>Fondo</th><th class="num">%</th><th class="num">Monto</th></tr></thead>
+        <tbody>
+          <tr><td>BBVAM</td><td class="num">40%</td><td class="num">$600,000</td></tr>
+          <tr><td>BBVAC</td><td class="num">20%</td><td class="num">$300,000</td></tr>
+          <tr><td>BBVAUS</td><td class="num">12%</td><td class="num">$180,000</td></tr>
+          <tr><td>BBVARV</td><td class="num">10%</td><td class="num">$150,000</td></tr>
+          <tr><td>BBVALIQ</td><td class="num">10%</td><td class="num">$150,000</td></tr>
+          <tr><td>BBVANDQ</td><td class="num">8%</td><td class="num">$120,000</td></tr>
+        </tbody>
+      </table>
+      <p><b>Rend. esperado:</b> ~11% → <b>+$165,000</b> (a $1,665,000)<br>
+      <b>Peor año plausible:</b> ~−8% → −$120,000<br>
+      <b>Volatilidad:</b> ~8–10% · <b>Liquidez:</b> diaria total</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN C -->
+  <div class="card" style="border-top:3px solid #e34948">
+    <h3 style="margin-top:0">🔴 Opción C — Crecimiento con piso protegido (usa warrants)</h3>
+    <p class="role" style="margin-top:0">Núcleo de deuda líquido + warrants de capital protegido como motor de bolsa
+    <b>sin riesgo de caída de mercado</b>. El precio: iliquidez de esa porción 1.5 años y riesgo de crédito BBVA.</p>
+    <div class="donut-wrap">
+      <table style="flex:1;min-width:320px">
+        <thead><tr><th>Instrumento</th><th>Rol</th><th class="num">%</th><th class="num">Monto</th></tr></thead>
+        <tbody>
+          <tr><td>BBVAC</td><td class="role">núcleo deuda líquido</td><td class="num">35%</td><td class="num">$525,000</td></tr>
+          <tr><td>BBVAM</td><td class="role">balanceado</td><td class="num">20%</td><td class="num">$300,000</td></tr>
+          <tr><td>Warrant SOXX</td><td class="role">motor protegido (tope ~10.5%)</td><td class="num">15%</td><td class="num">$225,000</td></tr>
+          <tr><td>Warrant S&P</td><td class="role">motor protegido (tope ~9.8%)</td><td class="num">15%</td><td class="num">$225,000</td></tr>
+          <tr><td>BBVAUS</td><td class="role">bolsa líquida</td><td class="num">10%</td><td class="num">$150,000</td></tr>
+          <tr><td>BBVALIQ</td><td class="role">pólvora seca</td><td class="num">5%</td><td class="num">$75,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Rend. esperado:</b> ~9.5% → <b>+$142,500</b> (a $1,642,500) &nbsp;·&nbsp;
+    <b>Peor año plausible:</b> ~−1.5% → −$22,500 &nbsp;·&nbsp; <b>Liquidez:</b> parcial (30% atado 1.5 años)</p>
+    <p class="flag"><b>La gracia:</b> el 30% en warrants no puede caer (capital protegido), así que el peor año de toda la cartera
+    es apenas −1.5% — <b>casi tan seguro como la Opción A pero con más techo</b>, porque si las bolsas suben, cobras hasta ~10%
+    en esa porción. El costo real: ese 30% queda atado 1.5 años y dependes del crédito de BBVA.</p>
+  </div>
+
+  <div class="callout good">
+    <b>¿Cuál escoger? El veredicto.</b>
+    <ul style="margin-bottom:0">
+      <li><b>Si no aguantas ver números rojos → Opción A.</b> ~8.5% con peor año de solo −2%. Sencilla y 100% líquida.</li>
+      <li><b>Si buscas el mejor rendimiento y toleras un mal año → Opción B.</b> ~11% esperado, pero prepárate para un −8% en un mal año bursátil.</li>
+      <li><b>Si quieres "lo mejor de ambos" → Opción C.</b> Casi el techo de B (~9.5%) con el piso de A (−1.5%), gracias a los
+      warrants protegidos — <b>a cambio de atar 30% por 1.5 años y aceptar el riesgo de crédito BBVA.</b></li>
+    </ul>
+    <b>Mi recomendación:</b> para "mejor rendimiento sin arriesgar tanto", <b>Opción C</b> es la más eficiente en riesgo/rendimiento
+    <i>si</i> no necesitas ese 30% líquido por 1.5 años. Si necesitas liquidez o desconfías de atar dinero al banco, <b>Opción A</b>.
+  </div>
+
+  <h3>El trade-off de un vistazo — rendimiento vs. peor año</h3>
+  <div class="legend">
+    <span class="lg"><span class="dot" style="background:#1baf7a"></span>A · Conservadora</span>
+    <span class="lg"><span class="dot" style="background:#c98500"></span>B · Riesgo medio</span>
+    <span class="lg"><span class="dot" style="background:#e34948"></span>C · Crecimiento (warrants)</span>
+  </div>
+  <div class="card">
+    <p class="sub" style="margin-top:0">Eje horizontal = peor año plausible (izquierda peor, derecha mejor); eje vertical =
+    rendimiento esperado. <b>Arriba-a-la-derecha es lo ideal</b> (gana más, cae menos). Se ve por qué <b>C domina a B</b>: casi el
+    mismo rendimiento con muchísima menos pérdida potencial; y por qué <b>C se acerca a A</b> en seguridad pero con más techo.</p>
+    <svg viewBox="0 0 720 400" role="img" aria-label="Rendimiento esperado vs peor año de las 3 opciones" style="width:100%;height:auto">
+      <!-- gridlines verticales: peor año -10,-8,-6,-4,-2,0 -->
+      <g stroke="#2c3a4d" stroke-width="1">
+        <line x1="90" y1="24" x2="90" y2="336"/><line x1="212" y1="24" x2="212" y2="336"/>
+        <line x1="334" y1="24" x2="334" y2="336"/><line x1="456" y1="24" x2="456" y2="336"/>
+        <line x1="578" y1="24" x2="578" y2="336"/><line x1="700" y1="24" x2="700" y2="336"/>
+      </g>
+      <!-- gridlines horizontales: rendimiento 7,9,11,13 -->
+      <g stroke="#2c3a4d" stroke-width="1">
+        <line x1="90" y1="336" x2="700" y2="336"/><line x1="90" y1="232" x2="700" y2="232"/>
+        <line x1="90" y1="128" x2="700" y2="128"/><line x1="90" y1="24" x2="700" y2="24"/>
+      </g>
+      <!-- etiquetas eje X (peor año) -->
+      <g fill="#898781" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">
+        <text x="90" y="354">−10%</text><text x="212" y="354">−8%</text><text x="334" y="354">−6%</text>
+        <text x="456" y="354">−4%</text><text x="578" y="354">−2%</text><text x="700" y="354">0%</text>
+        <text x="395" y="378" fill="#9db0c6" font-size="12">Peor año plausible → (menos pérdida es mejor)</text>
+      </g>
+      <!-- etiquetas eje Y (rendimiento) -->
+      <g fill="#898781" font-size="11" text-anchor="end" font-family="system-ui,sans-serif">
+        <text x="82" y="340">7%</text><text x="82" y="236">9%</text><text x="82" y="132">11%</text><text x="82" y="28">13%</text>
+      </g>
+      <text x="20" y="180" fill="#9db0c6" font-size="12" text-anchor="middle" font-family="system-ui,sans-serif" transform="rotate(-90 20 180)">Rendimiento esperado ↑</text>
+      <!-- zona ideal (arriba-derecha) sutil -->
+      <rect x="578" y="24" width="122" height="130" fill="#1baf7a" opacity="0.06"/>
+      <text x="694" y="40" fill="#1baf7a" font-size="10" text-anchor="end" font-family="system-ui,sans-serif" opacity="0.8">zona ideal</text>
+      <!-- puntos: A(-2%,8.5%) B(-8%,11%) C(-1.5%,9.5%) -->
+      <!-- X: 700 + peor*61 (peor negativo). A:-2→578 ; B:-8→212 ; C:-1.5→608.5 -->
+      <!-- Y: 336 - (rend-7)*52 . A:8.5→258 ; B:11→128 ; C:9.5→206 -->
+      <g stroke="#16212f" stroke-width="2.5">
+        <circle cx="578" cy="258" r="9" fill="#1baf7a"/>
+        <circle cx="212" cy="128" r="9" fill="#c98500"/>
+        <circle cx="609" cy="206" r="9" fill="#e34948"/>
+      </g>
+      <g font-family="system-ui,sans-serif" font-weight="700" font-size="12" fill="#e9eef5">
+        <text x="578" y="238" text-anchor="middle">A · 8.5% / −2%</text>
+        <text x="212" y="108" text-anchor="middle">B · 11% / −8%</text>
+        <text x="609" y="186" text-anchor="end">C · 9.5% / −1.5%</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ============ ALTERNATIVAS Y ETFs ============ -->
+  <h2 id="alternativas"><span class="n">10</span> Alternativas fuera de BBVA y ETFs (verificado en internet)</h2>
+
+  <h3>A. Fondos de deuda de otras casas que superan CETES con bajo riesgo</h3>
+  <p class="sub">Cifras confirmadas en fichas oficiales / Investing.com al 30 jun – 9 jul 2026. El nuevo listón: CETES 28d = 6.29%, 364d = 7.10%.</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Casa</th><th>Fondo</th><th class="num">Rend. 12m</th><th class="num">Comisión</th><th>Liquidez</th><th>Nota</th></tr></thead>
+      <tbody>
+        <tr><td><b>GBM</b></td><td>GBMF3 (deuda mediano plazo)</td><td class="num">7.99% neto</td><td class="num">0.30%</td><td>Semanal</td><td><span class="pill solid">El más fuerte</span> AAAf.mx</td></tr>
+        <tr><td><b>Principal</b></td><td>Deuda 1 (X2)</td><td class="num">8.74%</td><td class="num">n/d</td><td>n/d</td><td>Mejor lectura vigente</td></tr>
+        <tr><td><b>Franklin T.</b></td><td>FT-LIQU (deuda CP gub.)</td><td class="num">7.08%</td><td class="num">n/d</td><td>Corto plazo</td><td>100% gubernamental, AAAf</td></tr>
+        <tr><td><b>Invex</b></td><td>INVEXMP / INVEXCP (BF4)</td><td class="num">6.8–6.9%</td><td class="num">n/d</td><td>Inmediata</td><td>Premiados, "una acción"</td></tr>
+        <tr><td><b>Actinver</b></td><td>ACTIG+2 ("Dinámico")</td><td class="num">7.42% / 9.61% 3a</td><td class="num">n/d</td><td>Anual ⚠️</td><td>AAA/1, con candado ~1 año</td></tr>
+        <tr><td><b>Cetesdirecto</b></td><td>BONDDIA / CETES directo</td><td class="num">~6.5% / 7.1%</td><td class="num">0–0.25%</td><td>Diaria</td><td>Piso seguro imbatible en costo</td></tr>
+      </tbody>
+    </table>
+    <p class="flag">⚠️ <b>Vector está en liquidación</b> — descartar. Tasas de fintechs (Nu, Mercado Pago, Fintual) <b>no confirmadas</b>.
+    Realidad del ciclo: hoy <b>ningún fondo de deuda pura de bajo riesgo llega a 10% a 12 meses</b> — ese ~10% de BBVAC es a 3 años
+    (refleja tasas altas pasadas). En el entorno actual, lo realista en deuda segura es 7–8%.</p>
+  </div>
+
+  <h3>B. ETFs de NASDAQ / S&P 500 — ¿conviene comprarlos?</h3>
+  <div class="card">
+    <table>
+      <thead><tr><th>ETF</th><th>Índice</th><th class="num">Costo anual</th><th>vs. fondo BBVA</th></tr></thead>
+      <tbody>
+        <tr><td><b>VOO / IVV</b></td><td>S&amp;P 500</td><td class="num">0.03%</td><td>BBVAUS <b>no revela</b> su comisión</td></tr>
+        <tr><td><b>QQQM</b></td><td>NASDAQ-100</td><td class="num">0.15%</td><td>Más barato y transparente que BBVANDQ</td></tr>
+        <tr><td><b>QQQ</b></td><td>NASDAQ-100</td><td class="num">0.18%</td><td>Réplica pura del índice</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:10px"><b>Veredicto:</b> <span class="pill solid">Sí conviene, sobre todo el S&amp;P 500.</span> Un ETF de
+    S&amp;P 500 a <b>0.03%</b> con costo transparente, réplica pura, liquidez intradía y <b>el mismo 10% de ISR</b> (comprado en
+    pesos vía el <b>SIC de la BMV</b>) es difícil de superar por un fondo bancario que ni publica su comisión. Se compra vía GBM+, Kuspit o Hapi.</p>
+    <p class="flag"><b>Matices:</b> requiere abrir casa de bolsa; y si vendes tus fondos BBVA para migrar, <b>detonas el 10% de ISR</b>
+    sobre la ganancia acumulada — evalúalo antes de mover. BBVANDQ es gestión asesorada (Amundi), no réplica pura del índice.</p>
+  </div>
+
+  <!-- ============ SIMULADOR ============ -->
+  <h2 id="simulador"><span class="n">11</span> Las 8 carteras del simulador — comparación</h2>
+  <p class="sub">Ninguna trae etiqueta de perfil ni Sharpe. Se juzgan por <b>forma de asignación</b> (sus vol/rend de 1 mes no son fiables).
+  Rend. anualizado = 1 mes ×12 (factor 252 días); volatilidad y caída son de un solo mes.</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Run</th><th>Cartera</th><th>Pesos</th>
+        <th class="num">Rend. anual.†</th><th class="num">Volat.†</th><th class="num">Caída†</th><th>Lectura</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Cartera BBVA</td><td>C 70 / LIQ 10 / RV 10 / C+ 10</td><td class="num">16.74%</td><td class="num">3.08%</td><td class="num">−0.55%</td><td>Conservadora, RV mínima</td></tr>
+        <tr><td>1</td><td>Cartera BBVA 1</td><td>C 60 / LIQ 10 / RV 10 / US 10 / NDQ 10</td><td class="num">22.86%</td><td class="num">3.60%</td><td class="num">−0.63%</td><td><span class="pill solid">Mejor forma moderada</span></td></tr>
+        <tr><td>1</td><td>Cartera BBVA 2</td><td>C 60 / C+ 30 / LIQ 10</td><td class="num">11.31%</td><td class="num">1.52%</td><td class="num">−0.30%</td><td><span class="pill solid">Mejor forma conservadora</span> · 0% RV</td></tr>
+        <tr><td>1</td><td>Cartera BBVA 3</td><td>M 60 / LIQ 20 / C+ 20</td><td class="num">17.86%</td><td class="num">2.71%</td><td class="num">−0.55%</td><td>Conservadora-moderada</td></tr>
+        <tr><td>2</td><td>Cartera BBVA</td><td>C 50 / M 30 / LIQ 20</td><td class="num">16.98%</td><td class="num">2.60%</td><td class="num">−0.53%</td><td>Conservadora balanceada</td></tr>
+        <tr><td>2</td><td>Cartera BBVA 1</td><td>M 50 / C 30 / LIQ 20</td><td class="num">19.24%</td><td class="num">3.00%</td><td class="num">−0.62%</td><td>Moderada suave (núcleo M)</td></tr>
+        <tr><td>2</td><td>Cartera BBVA 2</td><td>C 70 / LIQ 20 / RV 10</td><td class="num">16.70%</td><td class="num">3.06%</td><td class="num">−0.55%</td><td>Conservadora</td></tr>
+        <tr><td>2</td><td>Cartera BBVA 3</td><td>RV 70 / LIQ 30</td><td class="num">35.00%</td><td class="num">12.08%</td><td class="num">−2.71%</td><td><span class="pill weak">Evitar — 70% una sola bolsa</span></td></tr>
+      </tbody>
+    </table>
+    <p class="flag">† Cifras del simulador para una ventana de 1 mes (1–29 may 2026), anualizadas. <b>No son expectativas a futuro.</b></p>
+  </div>
+  <div class="callout">
+    <b>Conclusión sobre el simulador.</b> La <b>forma</b> más cercana a conservador es <i>Run 1 · Cartera BBVA 2</i> (100% defensiva)
+    pero deja rendimiento sobre la mesa con 0% RV — mi propuesta añade un satélite del 15%. La <b>forma</b> más cercana a moderado
+    es <i>Run 1 · Cartera BBVA 1</i> (~30% RV diversificada), pero su núcleo es BBVAC (conservador) en vez de BBVAM — mi propuesta
+    usa BBVAM de núcleo para más eficiencia. <i>Run 2 · Cartera BBVA 3</i> (70% RV México) se descarta por concentración.
+  </div>
+
+  <!-- ============ RIESGOS ============ -->
+  <h2 id="riesgos"><span class="n">12</span> Riesgos clave y vacíos de datos</h2>
+  <div class="two">
+    <div class="card">
+      <h3>Riesgos clave</h3>
+      <ul>
+        <li><b>Riesgo de tasas MXN:</b> un repunte golpearía BBVAC, BBVAC+ y BBVAM a la vez (todos deuda-intensivos).</li>
+        <li><b>Riesgo FX sin cobertura:</b> BBVAUS, BBVANDQ y BBVADIG tienen exposición MXN/USD abierta.</li>
+        <li><b>Solapamiento en mega-cap tech:</b> BBVAUS + BBVANDQ + BBVADIG comparten NVDA/AAPL/MSFT/AMZN — menos diversificación de la aparente.</li>
+        <li><b>Concentración en BBVARV:</b> top-10 = 69%, Materiales+Industrial+Financiero = 84%.</li>
+        <li><b>Riesgo de reinversión en LIQ/C+:</b> rendimiento cae al ceder las tasas.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Vacíos de datos (elevarían confianza a Alta)</h3>
+      <ul>
+        <li><b>Comisiones/TER:</b> ninguna ficha las publica — imposible verificar la ventaja neta real.</li>
+        <li><b>Benchmark, Sharpe y caída máxima oficial:</b> ausentes; todo riesgo es calculado.</li>
+        <li><b>SRRI/nivel 1–7:</b> solo BBVALIQ lo muestra (1/7).</li>
+        <li><b>Simulador de 1 mes:</b> pedir a BBVA una simulación de 3–5 años cambiaría materialmente vol y caída.</li>
+        <li><b>BBVALIQ as-of may 2026</b> — un mes más viejo que el resto.</li>
+        <li><b>Warrants/notas:</b> no revelan comisión de estructuración, mínimo, ni valor de salida anticipada; strike/niveles son "indicativos". Rendimientos de Opción C son estimaciones de topes, no históricos.</li>
+        <li><b>Riesgo de crédito BBVA:</b> ni la calificación del emisor ni la (falta de) cobertura IPAB se detallan en los documentos.</li>
+        <li><b>Alternativas y fintechs:</b> comisiones exactas (GBM/Invex/Actinver) y tasas de Nu/Mercado Pago/Fintual no confirmadas — sitios bloquearon acceso.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============ METODOLOGÍA ============ -->
+  <h2 id="metodo"><span class="n">13</span> Metodología</h2>
+  <div class="card">
+    <p>Cada fondo y cada producto estructurado fue evaluado por un <b>subagente independiente en paralelo</b> (uno por activo, sin
+    sesgo de anclaje entre ellos), leyendo su propio documento y aplicando la misma rúbrica, perfil y fecha as-of. Subagentes
+    adicionales extrajeron las 8 carteras de los simuladores. El hilo principal sintetizó, hizo verificación cruzada y construyó las carteras.</p>
+    <p><b>Búsqueda en internet (obligatoria):</b> se lanzaron subagentes de búsqueda web en paralelo para verificar el
+    <b>dato macro real</b> — CETES (Banxico), tasa objetivo, inflación (TradingEconomics) — validar la existencia de los 8 fondos
+    (bbva.mx, BMV), y hallar alternativas y expense ratios de ETFs. Cada cifra viva lleva fuente + fecha; lo no confirmado va marcado.</p>
+    <p><b>Regla de oro:</b> nunca se fabrican cifras. Rendimientos y composiciones vienen de las fichas; volatilidad/caída/Sharpe
+    se calcularon de las series y se marcan como tales; la tasa libre de riesgo y el régimen macro se <b>verificaron en internet</b>,
+    no se asumieron.</p>
+  </div>
+
+  <div class="disclaimer">
+    <b>Aviso:</b> Este análisis tiene fines educativos e informativos y <b>no constituye asesoría financiera, de inversión,
+    legal ni fiscal</b> personalizada. Se basa en las fichas técnicas y simuladores proporcionados, en datos macro verificados
+    en internet (Banxico/TradingEconomics al 9 jul 2026) y en volatilidades/caídas calculadas de las series. Cifras de fintechs
+    y comisiones exactas de fondos quedaron sin confirmar. El
+    rendimiento histórico <b>no garantiza</b> resultados futuros; toda inversión implica riesgo, incluida la posible pérdida
+    de capital. Verifica las cifras —en especial comisiones/TER, que las fichas no revelan— con BBVA antes de invertir y
+    consulta a un asesor financiero autorizado.
+  </div>
+
+  <footer>Generado por la skill <b>asset-advisor</b> · evaluación con subagentes en paralelo · análisis educativo, no asesoría financiera · 9 jul 2026</footer>
+</div>
+</body>
+</html>
